@@ -1,5 +1,13 @@
 # DSGo
 
+## Directory Structure
+```tree
+├── core
+│   ├── core.go
+├── go.mod
+└── README.md
+```
+
 ## Idea
 The basic idea is we have nodes that pass messages. We're solving consensus and we need some way to test that. To achieve all of this we'll use a simulator named core. 
 
@@ -15,3 +23,23 @@ The basic idea is we have nodes that pass messages. We're solving consensus and 
 * React to timers
 
 We would like to be able to test with some combination of determinstic testing + search tests.
+
+## Design
+## Core
+Core is the simulation engine. Its function is to model a distributed system through a set of nodes interconnected with a simulated network.
+
+The goals for Core are (1) reproduce distributed system, (2) allow configurable fault injections, and (3) provide a clean way to nodes to send and recieve messages. The natural approach to this is messages (through channels) are routed through Core.
+
+## Node
+Each node runs as a go routine and implements the following:
+  type Node interface {
+      Init(ctx NodeContext)
+      HandleMessage(msg Message)
+      HandleTimer(timerID string)
+  }
+Core provides the following context for the node to use:
+type NodeContext interface {
+    Send(destID string, msg Message)
+    SetTimer(timerID string, delay time.Time)
+    Log(level string, format string, args ...any)
+}
