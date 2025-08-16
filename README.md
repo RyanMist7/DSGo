@@ -32,14 +32,18 @@ The goals for Core are (1) reproduce distributed system, (2) allow configurable 
 
 ## Node
 Each node runs as a go routine and implements the following:
+```
   type Node interface {
       Init(ctx NodeContext)
       HandleMessage(msg Message)
       HandleTimer(timerID string)
   }
+```
 Core provides the following context for the node to use:
+```
 type NodeContext interface {
     Send(destID string, msg Message)
     SetTimer(timerID string, delay time.Time)
     Log(level string, format string, args ...any)
 }
+```
