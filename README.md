@@ -4,7 +4,9 @@
 ```tree
 ├── core
 │   ├── core.go
+│   ├── nodeContext.go
 ├── go.mod
+├── go.sum
 └── README.md
 ```
 
@@ -36,14 +38,14 @@ Each node runs as a go routine and implements the following:
   type Node interface {
       Init(ctx NodeContext)
       HandleMessage(msg Message)
-      HandleTimer(timerID string)
+      HandleTimer(timer NodeTimer)
   }
 ```
 Core provides the following context for the node to use:
 ```
 type NodeContext interface {
-    Send(destID string, msg Message)
-    SetTimer(timerID string, delay time.Time)
+    Send(destID NodeId, msg Message)
+    SetTimer(timer NodeTimer, delay time.Duration)
     Log(level string, format string, args ...any)
 }
 ```
