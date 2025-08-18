@@ -19,7 +19,7 @@ type nodeContext struct {
 }
 
 type NodeTimer struct {
-	message TimerMessage
+	Message TimerMessage
 }
 
 type NodeLogger struct {

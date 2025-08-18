@@ -25,9 +25,10 @@ type Core struct {
 
 func NewCore() *Core {
 	return &Core{
-		nodes:    make(map[NodeId]Node),
-		channels: make(map[NodeId]chan Message),
-		timers:   make(map[NodeId]map[int]activeTimer),
+		nodes:       make(map[NodeId]Node),
+		channels:    make(map[NodeId]chan Message),
+		timers:      make(map[NodeId]map[int]activeTimer),
+		nextTimerId: make(map[NodeId]int),
 	}
 }
 
@@ -61,7 +62,7 @@ func (c *Core) runNode(id NodeId, node Node) {
 	for msg := range ch {
 		switch m := msg.(type) {
 		case TimerMessage:
-			node.HandleTimer(NodeTimer{message: m})
+			node.HandleTimer(NodeTimer{Message: m})
 		case Message:
 			node.HandleMessage(m)
 		default:

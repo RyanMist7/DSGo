@@ -36,14 +36,14 @@ func (ctx *nodeContext) SetTimer(nodeTimer NodeTimer, delay time.Duration) {
 	ctx.core.nextTimerId[ctx.nodeId]++
 
 	t := time.AfterFunc(delay, func() {
-		ctx.core.channels[ctx.nodeId] <- nodeTimer.message
+		ctx.core.channels[ctx.nodeId] <- nodeTimer.Message
 		ctx.core.mu.Lock()
 		delete(ctx.core.timers[ctx.nodeId], timerId)
 		ctx.core.mu.Unlock()
 	})
 
 	timer := activeTimer{
-		message: nodeTimer.message,
+		message: nodeTimer.Message,
 		timer:   t,
 		timerId: timerId,
 	}

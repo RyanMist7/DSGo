@@ -6,6 +6,11 @@
 │   ├── core.go
 │   ├── nodeContext.go
 │   ├── types.go
+├── nodes
+│   ├── simple
+│   │   ├── pingpong.go
+├── tests
+│   ├── core_test.go
 ├── go.mod
 ├── go.sum
 └── README.md
