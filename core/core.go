@@ -2,18 +2,7 @@ package core
 
 import (
 	"sync"
-	"time"
 )
-
-type Message interface{}
-type TimerMessage struct{ TimerName string }
-
-// NodeContext is the API Core gives to each node
-type NodeContext interface {
-	Send(destID NodeId, msg Message)
-	SetTimer(timer NodeTimer, delay time.Duration)
-	Log(level string, format string, args ...any)
-}
 
 type Node interface {
 	Init(ctx NodeContext)
@@ -23,10 +12,10 @@ type Node interface {
 
 type Core struct {
 	mu          sync.Mutex
-	nodes       map[NodeId]Node          // map of node id --> node
-	channels    map[NodeId]chan Message  // map of node id --> channels
-	timers      map[NodeId]map[int]timer // map of node id --> map of timer id ->  list of active timers
-	nextTimerId map[NodeId]int           // map of node id -> next timer id
+	nodes       map[NodeId]Node                // map of node id --> node
+	channels    map[NodeId]chan Message        // map of node id --> channels
+	timers      map[NodeId]map[int]activeTimer // map of node id --> map of timer id ->  list of active timers
+	nextTimerId map[NodeId]int                 // map of node id -> next timer id
 	// TODO: eventually add other configurable stuff here
 	// (1) message latency
 	// (2) message loss / duplication / reordering (might want to be opinionated on duplication & reordering)
@@ -38,7 +27,7 @@ func NewCore() *Core {
 	return &Core{
 		nodes:    make(map[NodeId]Node),
 		channels: make(map[NodeId]chan Message),
-		timers:   make(map[NodeId]map[int]timer),
+		timers:   make(map[NodeId]map[int]activeTimer),
 	}
 }
 
@@ -52,7 +41,7 @@ func (c *Core) RegisterNode(id NodeId, node Node) {
 
 	c.nodes[id] = node
 	c.channels[id] = make(chan Message, 10)
-	c.timers[id] = make(map[int]timer)
+	c.timers[id] = make(map[int]activeTimer)
 	c.nextTimerId[id] = 1
 
 	ctx := &nodeContext{

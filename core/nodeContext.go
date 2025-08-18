@@ -5,21 +5,11 @@ import (
 	"time"
 )
 
-type NodeId int
-
-type timer struct {
-	message TimerMessage
-	timer   *time.Timer
-	timerId int
-}
-
-type nodeContext struct {
-	core   *Core
-	nodeId NodeId
-}
-
-type NodeTimer struct {
-	message TimerMessage
+// NodeContext is the API Core gives to each node
+type NodeContext interface {
+	Send(destID NodeId, msg Message)
+	SetTimer(timer NodeTimer, delay time.Duration)
+	Log(level string, format string, args ...any)
 }
 
 func (ctx *nodeContext) Send(destId NodeId, msg Message) {
@@ -39,17 +29,16 @@ func (ctx *nodeContext) SetTimer(nodeTimer NodeTimer, delay time.Duration) {
 	timerId := ctx.core.nextTimerId[ctx.nodeId]
 	ctx.core.nextTimerId[ctx.nodeId]++
 
-	t := time.AfterFunc(delay, func(id int) func() {
-		return func() {
+	t := time.AfterFunc(delay, func() {
+		go func() {
 			ctx.core.channels[ctx.nodeId] <- nodeTimer.message
-
 			ctx.core.mu.Lock()
-			delete(ctx.core.timers[ctx.nodeId], id)
+			delete(ctx.core.timers[ctx.nodeId], timerId)
 			ctx.core.mu.Unlock()
-		}
-	}(timerId))
+		}()
+	})
 
-	timer := timer{
+	timer := activeTimer{
 		message: nodeTimer.message,
 		timer:   t,
 		timerId: timerId,
