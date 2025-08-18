@@ -9,7 +9,7 @@ import (
 type NodeContext interface {
 	Send(destID NodeId, msg Message)
 	SetTimer(timer NodeTimer, delay time.Duration)
-	Log(level string, format string, args ...any)
+	Log() *NodeLogger
 }
 
 func (ctx *nodeContext) Send(destId NodeId, msg Message) {
@@ -23,6 +23,12 @@ func (ctx *nodeContext) Send(destId NodeId, msg Message) {
 	}()
 }
 
+func (ctx *nodeContext) Broadcast(nodeIDs []NodeId, msg Message) {
+	for _, id := range nodeIDs {
+		ctx.Send(id, msg)
+	}
+}
+
 func (ctx *nodeContext) SetTimer(nodeTimer NodeTimer, delay time.Duration) {
 	ctx.core.mu.Lock()
 	defer ctx.core.mu.Unlock()
@@ -30,12 +36,10 @@ func (ctx *nodeContext) SetTimer(nodeTimer NodeTimer, delay time.Duration) {
 	ctx.core.nextTimerId[ctx.nodeId]++
 
 	t := time.AfterFunc(delay, func() {
-		go func() {
-			ctx.core.channels[ctx.nodeId] <- nodeTimer.message
-			ctx.core.mu.Lock()
-			delete(ctx.core.timers[ctx.nodeId], timerId)
-			ctx.core.mu.Unlock()
-		}()
+		ctx.core.channels[ctx.nodeId] <- nodeTimer.message
+		ctx.core.mu.Lock()
+		delete(ctx.core.timers[ctx.nodeId], timerId)
+		ctx.core.mu.Unlock()
 	})
 
 	timer := activeTimer{
@@ -47,6 +51,16 @@ func (ctx *nodeContext) SetTimer(nodeTimer NodeTimer, delay time.Duration) {
 
 }
 
-func (ctx *nodeContext) Log(level string, format string, args ...any) {
-	fmt.Printf("[n%d][%s] %s\n", ctx.nodeId, level, fmt.Sprintf(format, args...))
+func (ctx *nodeContext) Log() *NodeLogger {
+	return &ctx.logger
+}
+
+func (l *NodeLogger) Info(format string, args ...any) {
+	fmt.Printf("[n%d][INFO] %s\n", l.nodeId, fmt.Sprintf(format, args...))
+}
+func (l *NodeLogger) Warn(format string, args ...any) {
+	fmt.Printf("[n%d][WARN] %s\n", l.nodeId, fmt.Sprintf(format, args...))
+}
+func (l *NodeLogger) Error(format string, args ...any) {
+	fmt.Printf("[n%d][ERROR] %s\n", l.nodeId, fmt.Sprintf(format, args...))
 }

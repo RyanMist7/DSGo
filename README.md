@@ -21,17 +21,17 @@ The basic idea is we have nodes that pass messages. We're solving consensus and 
 * Simulate partitions.
 
 **Nodes** are some implementation of the algorithm. Each node should be able to:
-* Recieve and process messages
+* Receive and process messages
 * Send messages to any node or client (via Core)
 * React to timers
 
-We would like to be able to test with some combination of determinstic testing + search tests.
+We would like to be able to test with some combination of deterministic testing + search tests.
 
 ## Design
 ## Core
 Core is the simulation engine. Its function is to model a distributed system through a set of nodes interconnected with a simulated network.
 
-The goals for Core are (1) reproduce distributed system, (2) allow configurable fault injections, and (3) provide a clean way to nodes to send and recieve messages. The natural approach to this is messages (through channels) are routed through Core.
+The goals for Core are (1) reproduce distributed system, (2) allow configurable fault injections, and (3) provide a clean way for nodes to send and recieve messages. The natural approach to this is messages (through channels) are routed through Core.
 
 ## Node
 Each node runs as a go routine and implements the following:
@@ -47,6 +47,6 @@ Core provides the following context for the node to use:
 type NodeContext interface {
     Send(destID NodeId, msg Message)
     SetTimer(timer NodeTimer, delay time.Duration)
-    Log(level string, format string, args ...any)
+    Log()
 }
 ```

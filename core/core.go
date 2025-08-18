@@ -47,6 +47,7 @@ func (c *Core) RegisterNode(id NodeId, node Node) {
 	ctx := &nodeContext{
 		core:   c,
 		nodeId: id,
+		logger: NodeLogger{nodeId: id},
 	}
 
 	node.Init(ctx)

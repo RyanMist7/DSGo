@@ -15,10 +15,15 @@ type activeTimer struct {
 type nodeContext struct {
 	core   *Core
 	nodeId NodeId
+	logger NodeLogger
 }
 
 type NodeTimer struct {
 	message TimerMessage
+}
+
+type NodeLogger struct {
+	nodeId NodeId
 }
 
 type Message interface{}
